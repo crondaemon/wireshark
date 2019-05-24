@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Verifies whether commit messages adhere to the standards.
-# Checks the author name and email and invokes the tools/commit-msg script.
+# Checks the author name and email and invokes the git-hooks/commit-msg script.
 # Copy this into .git/hooks/post-commit
 #
 # Copyright (c) 2018 Peter Wu <peter@lekensteyn.nl>
@@ -84,7 +84,7 @@ def verify_email(email):
     return True
 
 
-def tools_dir():
+def git_hooks_dir():
     if __file__.endswith('.py'):
         # Assume direct invocation from tools directory
         return os.path.dirname(__file__)
@@ -92,7 +92,7 @@ def tools_dir():
     # for the .git directory, but query the actual top level instead.
     cmd = ['git', 'rev-parse', '--show-toplevel']
     srcdir = subprocess.check_output(cmd, universal_newlines=True).strip()
-    return os.path.join(srcdir, 'tools')
+    return os.path.join(srcdir, 'git-hooks')
 
 
 def extract_subject(subject):
@@ -136,7 +136,7 @@ Please rewrite your commit message to our standards, matching this format:
         with open(filename, 'w') as f:
             f.write(body)
 
-        hook_script = os.path.join(tools_dir(), 'commit-msg')
+        hook_script = os.path.join(git_hooks_dir(), 'commit-msg')
         cmd = ['sh', hook_script, filename]
         subprocess.check_output(cmd, universal_newlines=True)
 
@@ -146,7 +146,7 @@ Please rewrite your commit message to our standards, matching this format:
         print('Warning: unable to invoke commit-msg hook: %s' % (ex,))
         return is_good
     except subprocess.CalledProcessError as ex:
-        print('Bad commit message (reported by tools/commit-msg):')
+        print('Bad commit message (reported by git-hooks/commit-msg):')
         print(ex.output.strip())
         return False
     finally:

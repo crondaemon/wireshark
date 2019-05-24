@@ -220,12 +220,11 @@ internet connection.
 --
 ----
 $ cd wireshark
-$ cp tools/pre-commit .git/hooks/
+$ git config --local core.hooksPath git-hooks
 $ git config --add remote.origin.push HEAD:refs/for/master
 ----
 This will run a few basic checks on commit to make sure that the code
-does not contain trivial errors. It will also warn if it is out of sync
-with its master copy in the tools/ directory.
+does not contain trivial errors.
 The change in the push address is necessary: We have an asymmetric
 process for pulling and pushing because of gerrit.
 --
@@ -863,19 +862,21 @@ different approach, and some multiple source file dissectors are more suitable t
 be placed separately as plugins.
 
 * _Ensure Wireshark Git Pre-Commit Hook is in the repository._  In your local
-repository directory, there will be a .git/hooks/ directory, with sample git hooks
+repository directory, there will be a git-hooks/ directory, with project's git hooks
 for running automatic actions before and after git commands. You can also
 optionally install other hooks that you find useful.
 +
 In particular, the pre-commit hook will run every time you commit a change and can
 be used to automatically check for various errors in your code. The sample git
-pre-commit hook simply detects whitespace errors such as mixed tabs and spaces;
-to install it just remove the .sample suffice from the existing pre-commit.sample file.
+pre-commit hook simply detects whitespace errors such as mixed tabs and spaces.
 +
 Wireshark provides a custom pre-commit hook which does additional Wireshark-specific API
 and formatting checks, but it might return false positives. If you want to install it,
-copy the pre-commit file from the tools directory (cp ./tools/pre-commit .git/hooks/)
-and make sure it is executable or it will not be run.
+you have to change the git hooks directory with `git config --local core.hooksPath git-hooks`
+and make sure it is executable or it will not be run. With this command we have changed
+the hooks directory: if we want to use the standard git hooks (the ones provided as
+sample in the .git/hooks directory), we have to copy them into git-hooks/ of the
+Wireshark tree.
 +
 If the pre-commit hook is preventing you from committing what you believe is a valid
 change, you can run git commit --no-verify to skip running the hooks. Warning: using
@@ -883,13 +884,6 @@ change, you can run git commit --no-verify to skip running the hooks. Warning: u
 Change-ID to your commit. In case you are not updating an existing patch you may generate
 a Change-ID by running git review -i (or git commit --amend if don't use git review).
 +
-
-Additionally, if your system supports symbolic links, as all UNIX-like
-platforms do, you can use them instead of copying files.  Running ln -s
-./tools/pre-commit .git/hooks creates a symbolic link that will make the
-hook to be up-to-date with the current master.  The same can be done for
-commit-msg script.
-
 
 * _Fuzz test your changes!_ Fuzz testing is a very
 effective way to automatically find a lot of dissector related bugs.
@@ -949,7 +943,7 @@ You might get one of the following responses to your patch request:
   insecure code, and code that won't compile on other platforms. In each case
   you'll have to fix each problem and upload another patch.
 
-* You don't get any response to your patch. Possible reason: All
+* You don't get any response to your patch. Possible reason: all
   the core developers are busy (e.g., with their day jobs or family or other commitments) and
   haven't had time to look at your patch. Don't worry, if
   your patch is in the review system it won't get lost.
