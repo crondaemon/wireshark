@@ -68,6 +68,7 @@ set(WIRETAP_NONGENERATED_FILES
 	packetlogger.c
 	pcap-common.c
 	pcapng.c
+	pgp.c
 	peekclassic.c
 	peektagged.c
 	rfc7468.c

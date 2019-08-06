@@ -79,7 +79,7 @@
 #include "log3gpp.h"
 #include "candump.h"
 #include "busmaster.h"
-
+#include "pgp.h"
 
 /*
  * Add an extension, and all compressed versions thereof if requested,
@@ -152,6 +152,7 @@ static const struct file_extension_info file_type_extensions_base[] = {
 	{ "Transport-Neutral Encapsulation Format", FALSE, "tnef" },
 	{ "JPEG/JFIF files", FALSE, "jpg;jpeg;jfif" },
 	{ "JavaScript Object Notation file", FALSE, "json" },
+	{ "PGP", FALSE, "pgp" },
 };
 
 #define	N_FILE_TYPE_EXTENSIONS	(sizeof file_type_extensions_base / sizeof file_type_extensions_base[0])
@@ -430,7 +431,7 @@ static const struct open_info open_info_base[] = {
 	{ "Ruby Marshal Object",                    OPEN_INFO_HEURISTIC, ruby_marshal_open,        "",         NULL, NULL },
 	{ "Systemd Journal",                        OPEN_INFO_HEURISTIC, systemd_journal_open,     "log;jnl;journal",      NULL, NULL },
 	{ "3gpp phone log",                         OPEN_INFO_MAGIC,     log3gpp_open,             "log",      NULL, NULL },
-
+	{ "PGP",                                    OPEN_INFO_HEURISTIC, pgp_open,                 "pgp",      NULL, NULL },
 };
 
 /* this is only used to build the dynamic array on load, do NOT use this
@@ -1664,6 +1665,11 @@ static const struct file_type_subtype_info dump_open_table_base[] = {
 
 	/* WTAP_FILE_TYPE_SUBTYPE_LOG_3GPP */
 	{ "3GPP Log", "3gpp_log", "*.log", NULL,
+	  TRUE, FALSE, 0,
+	  NULL, NULL, NULL },
+
+	/* WTAP_FILE_TYPE_SUBTYPE_PGP */
+	{ "PGP", "pgp", "pgp", NULL,
 	  TRUE, FALSE, 0,
 	  NULL, NULL, NULL }
 };
