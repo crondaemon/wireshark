@@ -19,4 +19,4 @@ jobs:
 
           for further instructions.
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.CLOSE_PR_TOKEN }}
