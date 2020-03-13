@@ -114,3 +114,5 @@ where "<ifname>" is the name of the interface.
 Newer versions of libpcap shouldn't have this problem, even on 2.0[.x]
 kernels; no version of libpcap should have that problem on systems with
 2.2 or later kernels.
+
+I love linux.
