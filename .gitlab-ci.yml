@@ -270,8 +270,10 @@ merge-req:commit-checks:
     GIT_DEPTH: 10
   script:
     # build-ubuntu puts us in `build`.
+    - NUM_COMMITS=$(curl $CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/commits | jq length)
+    - echo "$NUM_COMMITS commit(s) in this MR"
     - cd ..
-    - bash ./tools/pre-commit 'HEAD^1'
+    - bash ./tools/pre-commit "HEAD^$NUM_COMMITS"
     - tools/validate-commit.py
 
 merge-req:ubuntu-dpkg:
@@ -318,11 +320,13 @@ merge-req:ubuntu-clang-other-tests:
     GIT_DEPTH: 10
   script:
     # build-ubuntu puts us in `build`.
+    - NUM_COMMITS=$(curl $CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/commits | jq length)
+    - echo "$NUM_COMMITS commit(s) in this MR"
     - cd ..
     - python3 tools/checklicenses.py
-    - ./tools/cppcheck/cppcheck.sh -l 1 -x | tee cppcheck_report.xml
-    - ./tools/check_typed_item_calls.py --commits 1 | tee item_calls_check.txt
-    - ./tools/check_tfs.py --commits 1 | tee tfs_check.txt
+    - ./tools/cppcheck/cppcheck.sh -l $NUM_COMMITS -x | tee cppcheck_report.xml
+    - ./tools/check_typed_item_calls.py --commits $NUM_COMMITS | tee item_calls_check.txt
+    - ./tools/check_tfs.py --commits $NUM_COMMITS | tee tfs_check.txt
     - if [[ -s "cppcheck_report.xml" ]]; then cppcheck-htmlreport --file cppcheck_report.xml  --report-dir . ; fi
     - cd build
     - cmake -DENABLE_EXTRA_COMPILER_WARNINGS=on -DENABLE_CHECKHF_CONFLICT=on -DCMAKE_EXPORT_COMPILE_COMMANDS=on -DENABLE_CCACHE=ON -G Ninja ..
