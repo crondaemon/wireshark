@@ -22,6 +22,7 @@
 #include <getopt.h>
 #endif
 
+error
 #include <errno.h>
 
 #ifdef _WIN32
