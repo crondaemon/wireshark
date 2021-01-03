@@ -1,5 +1,8 @@
 language: minimal
 dist: bionic
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew
 matrix:
   include:
     - name: OSX (xcode12.2 clang-12.0.0)
@@ -59,11 +62,14 @@ matrix:
     # Those builds frequently fail due to builds longer than maximum allowed.
     # Let them fail quietly.
     arch: ppc64le
+before_cache:
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew cleanup; fi
 before_install:
   - echo $TRAVIS_OS_NAME
   # macos
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update ; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then ./tools/macos-setup-brew.sh; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install softhsm; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install softhsm ccache; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sed s/access_bpf/staff/ packaging/macosx/ChmodBPF/ChmodBPF | sudo bash; fi
   # linux
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ./tools/debian-setup.sh --install-optional --install-test-deps -q; fi
