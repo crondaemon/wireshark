@@ -84,7 +84,7 @@ script:
   - ninja || travis_assert
   - ninja test-programs
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo setcap cap_net_raw,cap_net_admin+eip run/dumpcap; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then /Users/travis/build/crondaemon/wireshark/build/run/tshark -r /Users/travis/build/crondaemon/wireshark/test/captures/rsa-p-lt-q.pcap -o uat:pkcs11_libs:/usr/local/lib/softhsm/libsofthsm2.so -o uat:rsa_keys:pkcs11:token=Wireshark-Test-Tokens;id=%ab%12;type=private,Secret -Tfields -e http.request.uri -Y http; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then /Users/travis/build/crondaemon/wireshark/build/run/tshark -r /Users/travis/build/crondaemon/wireshark/test/captures/rsa-p-lt-q.pcap -o uat:pkcs11_libs:/usr/local/lib/softhsm/libsofthsm2.so -o "uat:rsa_keys:pkcs11:token=Wireshark-Test-Tokens;id=%ab%12;type=private,Secret" -Tfields -e http.request.uri -Y http; fi
 after_script:
   - if [ -f run/tshark ]; then run/tshark --version; fi
   - ../test/travis-upload-artifacts.sh
