@@ -6032,22 +6032,10 @@ tls_keylog_process_lines(const ssl_master_key_map_t *mk_map, const guint8 *data,
     }
 }
 
-void
-ssl_load_keyfile(const gchar *tls_keylog_filename, FILE **keylog_file,
-                 const ssl_master_key_map_t *mk_map)
+static void
+ssl_read_keyfile(const gchar *tls_keylog_filename, FILE **keylog_file,
+                  const ssl_master_key_map_t *mk_map)
 {
-    /* no need to try if no key log file is configured. */
-    if (!tls_keylog_filename || !*tls_keylog_filename) {
-        ssl_debug_printf("%s dtls/tls.keylog_file is not configured!\n",
-                         G_STRFUNC);
-        return;
-    }
-
-    /* Validate regexes before even trying to use it. */
-    if (!ssl_compile_keyfile_regex()) {
-        return;
-    }
-
     ssl_debug_printf("trying to use TLS keylog in %s\n", tls_keylog_filename);
 
     /* if the keylog file was deleted/overwritten, re-open it */
@@ -6080,6 +6068,37 @@ ssl_load_keyfile(const gchar *tls_keylog_filename, FILE **keylog_file,
             break;
         }
         tls_keylog_process_lines(mk_map, (guint8 *)line, (int)strlen(line));
+    }
+}
+
+void
+ssl_load_keyfile(const gchar *tls_keylog_filename, FILE **keylog_file,
+                 const ssl_master_key_map_t *mk_map)
+{
+    const gchar* env_entry = g_getenv("SSLKEYLOGFILE");
+
+    /* no need to try if no key log file is configured. */
+    if ((!tls_keylog_filename || !*tls_keylog_filename) && !env_entry) {
+        ssl_debug_printf("%s dtls/tls.keylog_file is not configured!\n",
+                         G_STRFUNC);
+        return;
+    }
+
+    /* Validate regexes before even trying to use it. */
+    if (!ssl_compile_keyfile_regex()) {
+        return;
+    }
+
+    /* Preference for keylog_file has precedence over environment variable */
+    if (tls_keylog_filename && *tls_keylog_filename) {
+        ssl_read_keyfile(tls_keylog_filename, keylog_file, mk_map);
+        return;
+    }
+
+    /* No preference, but environment variable found. */
+    if (env_entry) {
+        ssl_debug_printf("SSLKEYLOGFILE found in the current environment.");
+        ssl_read_keyfile(env_entry, keylog_file, mk_map);
     }
 }
 /** SSL keylog file handling. }}} */
