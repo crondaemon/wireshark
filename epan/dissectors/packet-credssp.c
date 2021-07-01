@@ -287,7 +287,9 @@ dissect_credssp_T_credBuffer(gboolean implicit_tag _U_, tvbuff_t *tvb _U_, int o
 	switch(credssp_TS_RGC_package) {
 	case TS_RGC_KERBEROS:
 		subtree = proto_item_add_subtree(actx->created_item, ett_credssp_RGC_CredBuffer);
+#ifdef HAVE_KERBEROS
 		dissect_kerberos_KERB_TICKET_LOGON(creds, 0, actx, subtree);
+#endif
 		break;
 	case TS_RGC_NTLM:
 		subtree = proto_item_add_subtree(actx->created_item, ett_credssp_RGC_CredBuffer);

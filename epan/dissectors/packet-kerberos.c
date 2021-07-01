@@ -7597,6 +7597,7 @@ kerberos_display_key(gpointer data _U_, gpointer userdata _U_)
 #endif /* HAVE_KERBEROS */
 }
 
+#ifdef HAVE_KERBEROS
 static const value_string KERB_LOGON_SUBMIT_TYPE[] = {
     { 2, "KerbInteractiveLogon" },
     { 6, "KerbSmartCardLogon" },
@@ -7611,11 +7612,13 @@ static const value_string KERB_LOGON_SUBMIT_TYPE[] = {
     { 15, "KerbCertificateUnlockLogon" },
     { 0, NULL }
 };
+#endif /* HAVE_KERBEROS */
 
 
 #define KERB_LOGON_FLAG_ALLOW_EXPIRED_TICKET 0x1
 #define KERB_LOGON_FLAG_REDIRECTED           0x2
 
+#ifdef HAVE_KERBEROS
 static int* const ktl_flags_bits[] = {
 	&hf_kerberos_KERB_TICKET_LOGON_FLAG_ALLOW_EXPIRED_TICKET,
 	&hf_kerberos_KERB_TICKET_LOGON_FLAG_REDIRECTED,
@@ -7679,6 +7682,7 @@ dissect_kerberos_KERB_TICKET_LOGON(tvbuff_t *tvb, int offset, asn1_ctx_t *actx, 
 
 	return offset;
 }
+#endif
 
 static gint
 dissect_kerberos_common(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
@@ -8142,6 +8146,7 @@ void proto_register_kerberos(void) {
 	{ &hf_krb_key_hidden_item,
 	  { "KeyHiddenItem", "krb5.key_hidden_item",
 	    FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }},
+#ifdef HAVE_KERBEROS
     { &hf_kerberos_KERB_TICKET_LOGON,
       { "KERB_TICKET_LOGON", "kerberos.KERB_TICKET_LOGON",
         FT_NONE, BASE_NONE, NULL, 0,
@@ -8178,7 +8183,6 @@ void proto_register_kerberos(void) {
       { "redirected", "kerberos.KERB_TICKET_LOGON.FLAG_REDIRECTED",
         FT_BOOLEAN, 32, NULL, KERB_LOGON_FLAG_REDIRECTED,
         NULL, HFILL }},
-#ifdef HAVE_KERBEROS
 	{ &hf_kerberos_KrbFastResponse,
 	   { "KrbFastResponse", "kerberos.KrbFastResponse_element",
 	    FT_NONE, BASE_NONE, NULL, 0, NULL, HFILL }},
@@ -9191,7 +9195,7 @@ void proto_register_kerberos(void) {
         NULL, HFILL }},
 
 /*--- End of included file: packet-kerberos-hfarr.c ---*/
-#line 4734 "./asn1/kerberos/packet-kerberos-template.c"
+#line 4738 "./asn1/kerberos/packet-kerberos-template.c"
 	};
 
 	/* List of subtrees */
@@ -9309,7 +9313,7 @@ void proto_register_kerberos(void) {
     &ett_kerberos_PA_SPAKE,
 
 /*--- End of included file: packet-kerberos-ettarr.c ---*/
-#line 4762 "./asn1/kerberos/packet-kerberos-template.c"
+#line 4766 "./asn1/kerberos/packet-kerberos-template.c"
 	};
 
 	static ei_register_info ei[] = {
