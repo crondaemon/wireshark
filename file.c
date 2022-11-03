@@ -569,14 +569,20 @@ cf_read(capture_file *cf, gboolean reloading)
     ws_buffer_init(&buf, 1514);
 
     TRY {
+        guint32 count = 0;
+
         gint64  file_pos;
         gint64  data_offset;
 
         float   progbar_val;
         gchar   status_str[100];
+        gint    offset = cf->packets_offset;
 
-        while ((wtap_read(cf->provider.wth, &rec, &buf, &err, &err_info,
-                        &data_offset))) {
+        while(offset-- && wtap_read(cf->provider.wth, &rec, &buf, &err, &err_info, &data_offset))
+            ;
+
+        while ((cf->packets_limit == 0 || count < cf->packets_limit) &&
+                wtap_read(cf->provider.wth, &rec, &buf, &err, &err_info, &data_offset)) {
             if (size >= 0) {
                 if (cf->count == max_records) {
                     /*

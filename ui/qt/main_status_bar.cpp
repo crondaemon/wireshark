@@ -432,6 +432,16 @@ void MainStatusBar::showCaptureStatistics()
                     .arg(UTF8_MIDDLE_DOT)
                     .arg(cap_file_->packet_comment_count));
             }
+            if (cap_file_->packets_offset > 0) {
+                packets_str.append(QString(tr(" %1 Packets Offset: %2"))
+                    .arg(UTF8_MIDDLE_DOT)
+                    .arg(cap_file_->packets_offset));
+            }
+            if (cap_file_->packets_limit > 0) {
+                packets_str.append(QString(tr(" %1 Packets Limit: %2"))
+                    .arg(UTF8_MIDDLE_DOT)
+                    .arg(cap_file_->packets_limit));
+            }
             if (prefs.gui_qt_show_file_load_time && !cap_file_->is_tempfile) {
                 /* Loading an existing file */
                 gulong computed_elapsed = cf_get_computed_elapsed(cap_file_);

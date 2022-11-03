@@ -65,6 +65,8 @@ typedef struct _summary_tally {
     int                   snap;               /**< Maximum captured packet length; 0 if not known */
     gboolean              drops_known;        /**< TRUE if number of packet drops is known */
     guint64               drops;              /**< number of packet drops */
+    gint                  packets_offset;     /**< Offset in the capture file */
+    guint                 packets_limit;      /**< Limit the number of shown packets */
     const char           *dfilter;            /**< display filter */
     gboolean              is_tempfile;
     /* capture related, use summary_fill_in_capture() to get values */

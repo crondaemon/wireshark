@@ -263,7 +263,19 @@ int CaptureFileDialog::exec() {
     return QDialog::Rejected;
 }
 
+uint CaptureFileDialog::packetLimit() const {
+    QString content = packet_limit_->text();
+    if (content.size() == 0)
+        return 0;
+    return content.toInt();
+}
 
+int CaptureFileDialog::packetOffset() const {
+    QString content = packet_offset_->text();
+    if (content.size() == 0)
+        return 0;
+    return content.toInt();
+}
 
 // Windows
 // We use native file dialogs here, rather than the Qt dialog
@@ -647,6 +659,19 @@ void CaptureFileDialog::addDisplayFilterEdit(QString &display_filter) {
     last_row_++;
 }
 
+void CaptureFileDialog::addLimits() {
+    QGridLayout *fd_grid = qobject_cast<QGridLayout*>(layout());
+
+    fd_grid->addWidget(new QLabel(tr("Stop after N packets:")), last_row_, 0);
+    packet_limit_ = new QLineEdit();
+    fd_grid->addWidget(packet_limit_, last_row_, 1);
+    last_row_++;
+    fd_grid->addWidget(new QLabel(tr("Start from packet:")), last_row_, 0);
+    packet_offset_ = new QLineEdit();
+    fd_grid->addWidget(packet_offset_, last_row_, 1);
+    last_row_++;
+}
+
 void CaptureFileDialog::addFormatTypeSelector(QVBoxLayout &v_box) {
     int i;
     /* Put Auto, as well as pcap and pcapng (which are the first two entries in
@@ -708,6 +733,7 @@ int CaptureFileDialog::open(QString &file_name, unsigned int &type, QString &dis
     selectNameFilter(open_type_filters.at(1));
     setFileMode(QFileDialog::ExistingFile);
 
+    addLimits();
     addFormatTypeSelector(left_v_box_);
     addDisplayFilterEdit(display_filter);
     addPreview(right_v_box_);

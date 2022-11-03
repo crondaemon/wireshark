@@ -125,6 +125,8 @@ typedef struct _capture_file {
     gulong                      computed_elapsed;     /* Elapsed time to load the file (in msec). */
 
     guint32                     cum_bytes;
+    guint                       packets_limit;        /* Limit the number of loaded packets */
+    gint                        packets_offset;       /* Offset for reading start */
 } capture_file;
 
 extern void cap_file_init(capture_file *cf);

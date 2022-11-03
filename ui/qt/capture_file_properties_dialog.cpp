@@ -216,6 +216,18 @@ QString CaptureFilePropertiesDialog::summaryToHtml()
             << table_row_end;
     }
 
+    if (summary.packets_offset > 0)
+        out << table_row_begin
+            << table_data_tmpl.arg(tr("Packets Offset"))
+            << table_data_tmpl.arg(summary.packets_offset)
+            << table_row_end;
+
+    if (summary.packets_limit > 0)
+        out << table_row_begin
+            << table_data_tmpl.arg(tr("Packets Limit"))
+            << table_data_tmpl.arg(summary.packets_limit)
+            << table_row_end;
+
     out << table_end;
 
     // Time Section

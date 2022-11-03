@@ -70,14 +70,19 @@ public:
     int mergeType();
     int selectedFileType();
     wtap_compression_type compressionType();
+    uint packetLimit() const;
+    int packetOffset() const;
 
 private:
     capture_file *cap_file_;
+    QLineEdit* packet_limit_;
+    QLineEdit* packet_offset_;
 
 #if !defined(Q_OS_WIN)
     void addMergeControls(QVBoxLayout &v_box);
     void addFormatTypeSelector(QVBoxLayout &v_box);
     void addDisplayFilterEdit(QString &display_filter);
+    void addLimits();
     void addPreview(QVBoxLayout &v_box);
     QString fileExtensionType(int et, bool extension_globs = true);
     QString fileType(int ft, QStringList &suffixes);

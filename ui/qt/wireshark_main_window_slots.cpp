@@ -161,6 +161,7 @@ DIAG_ON(frame-larger-than=)
 #include "voip_calls_dialog.h"
 #include "wlan_statistics_dialog.h"
 #include <ui/qt/widgets/wireless_timeline.h>
+#include <wiretap/wtap.h>
 
 #include <functional>
 #include <QClipboard>
@@ -203,6 +204,8 @@ bool WiresharkMainWindow::openCaptureFile(QString cf_path, QString read_filter, 
 
             if (open_dlg.open(file_name, type, read_filter)) {
                 cf_path = file_name;
+                CaptureFile::globalCapFile()->packets_limit = open_dlg.packetLimit();
+                CaptureFile::globalCapFile()->packets_offset = open_dlg.packetOffset();
             } else {
                 ret = false;
                 goto finish;
@@ -258,6 +261,12 @@ bool WiresharkMainWindow::openCaptureFile(QString cf_path, QString read_filter, 
             continue;
         }
 
+        if (CaptureFile::globalCapFile()->packets_offset < 0) {
+            /* The user is asking to count backwards. At the moment, we don't know how long the file is,
+               hence we must count. */
+            countReverse();
+        }
+
         switch (cf_read(CaptureFile::globalCapFile(), FALSE)) {
         case CF_READ_OK:
         case CF_READ_ERROR:
@@ -288,6 +297,25 @@ finish:
         exit(0);
 #endif
     return ret;
+}
+
+void WiresharkMainWindow::countReverse()
+{
+    wtap *wth;
+    wtap_rec rec;
+    Buffer buf;
+    gint err;
+    char* err_info;
+    gint64 data_offset;
+
+    wth = wtap_open_offline(CaptureFile::globalCapFile()->filename, WTAP_TYPE_AUTO, &err, &err_info, FALSE);
+    wtap_rec_init(&rec);
+    ws_buffer_init(&buf, 1514);
+    while (wtap_read(wth, &rec, &buf, &err, &err_info, &data_offset))
+        CaptureFile::globalCapFile()->packets_offset++;
+    wtap_rec_cleanup(&rec);
+    ws_buffer_free(&buf);
+    wtap_close(wth);
 }
 
 void WiresharkMainWindow::filterPackets(QString new_filter, bool force)

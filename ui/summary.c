@@ -138,6 +138,8 @@ summary_fill_in(capture_file *cf, summary_tally *st)
     st->marked_stop = 0;
     st->marked_bytes = 0;
     st->ignored_count = 0;
+    st->packets_offset = 0;
+    st->packets_limit = 0;
 
     /* initialize the tally */
     if (cf->count != 0) {
@@ -163,6 +165,8 @@ summary_fill_in(capture_file *cf, summary_tally *st)
     st->packet_count = cf->count;
     st->drops_known = cf->drops_known;
     st->drops = cf->drops;
+    st->packets_offset = cf->packets_offset;
+    st->packets_limit = cf->packets_limit;
     st->dfilter = cf->dfilter;
 
     st->ifaces  = g_array_new(FALSE, FALSE, sizeof(iface_summary_info));

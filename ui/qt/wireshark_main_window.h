@@ -242,6 +242,7 @@ private:
     void removeMenuActions(QList<QAction *> &actions, int menu_group);
     void goToConversationFrame(bool go_next);
     void colorizeWithFilter(QByteArray filter, int color_number = -1);
+    void countReverse();
 
 signals:
     void setDissectedCaptureFile(capture_file *cf);
