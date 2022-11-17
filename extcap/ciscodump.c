@@ -1782,8 +1782,8 @@ static gboolean run_capture(ssh_channel channel, const char* iface, const char* 
 	if (!detect_host_prompt(channel))
 		goto error;
 
-	if (!check_ios_version(channel, sw_type))
-		goto error;
+	// if (!check_ios_version(channel, sw_type))
+	// 	goto error;
 
 	switch (*sw_type) {
 		case CISCO_IOS:
