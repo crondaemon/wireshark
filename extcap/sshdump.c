@@ -58,7 +58,7 @@ enum {
 	OPT_SSHKEY_PASSPHRASE,
 	OPT_PROXYCOMMAND,
 	OPT_REMOTE_COUNT,
-	OPT_REMOTE_SUDO,
+	OPT_REMOTE_SUDO_COMMAND,
 	OPT_REMOTE_NOPROM
 };
 
@@ -69,7 +69,7 @@ static struct ws_option longopts[] = {
 	SSH_BASE_OPTIONS,
 	{ "remote-capture-command-select", ws_required_argument, NULL, OPT_REMOTE_CAPTURE_COMMAND_SELECT},
 	{ "remote-capture-command", ws_required_argument, NULL, OPT_REMOTE_CAPTURE_COMMAND},
-	{ "remote-sudo", ws_no_argument, NULL, OPT_REMOTE_SUDO },
+	{ "remote-sudo-command", ws_required_argument, NULL, OPT_REMOTE_SUDO_COMMAND },
 	{ "remote-noprom", ws_no_argument, NULL, OPT_REMOTE_NOPROM },
 	{ 0, 0, 0, 0}
 };
@@ -130,7 +130,7 @@ static char* local_interfaces_to_filter(const guint16 remote_port)
 }
 
 static ssh_channel run_ssh_command(ssh_session sshs, const char* capture_command_select,
-		const char* capture_command, const gboolean use_sudo, gboolean noprom,
+		const char* capture_command, const char* sudo_command, gboolean noprom,
 		const char* iface, const char* cfilter, const guint32 count)
 {
 	gchar* cmdline = NULL;
@@ -175,7 +175,7 @@ static ssh_channel run_ssh_command(ssh_session sshs, const char* capture_command
 			count_str = ws_strdup_printf("-c %u", count);
 
 		cmdline = ws_strdup_printf("%s tcpdump -U %s%s %s -w - %s %s",
-			use_sudo ? "sudo" : "",
+			sudo_command ? sudo_command : "",
 			quoted_iface ? "-i " : "",
 			quoted_iface ? quoted_iface : "",
 			noprom ? "-p" : "",
@@ -196,7 +196,7 @@ static ssh_channel run_ssh_command(ssh_session sshs, const char* capture_command
 			count_str = ws_strdup_printf("-c %u", count);
 
 		cmdline = ws_strdup_printf("%s dumpcap %s %s -w - %s -f %s",
-			use_sudo ? "sudo" : "",
+			sudo_command ? sudo_command : "",
 			noprom ? "-p" : "",
 			*ifaces ? ifaces : "",
 			count_str ? count_str : "",
@@ -223,7 +223,7 @@ static ssh_channel run_ssh_command(ssh_session sshs, const char* capture_command
 }
 
 static int ssh_open_remote_connection(const ssh_params_t* params, const char* iface, const char* cfilter,
-	const char* capture_command_select, const char* capture_command, const gboolean use_sudo,
+	const char* capture_command_select, const char* capture_command, const char* sudo_command,
 	gboolean noprom, const guint32 count, const char* fifo)
 {
 	ssh_session sshs = NULL;
@@ -248,7 +248,8 @@ static int ssh_open_remote_connection(const ssh_params_t* params, const char* if
 		goto cleanup;
 	}
 
-	channel = run_ssh_command(sshs, capture_command_select, capture_command, use_sudo, noprom, iface, cfilter, count);
+	channel = run_ssh_command(sshs, capture_command_select, capture_command, sudo_command, noprom, iface, cfilter,
+		count);
 
 	if (!channel) {
 		ws_warning("Can't run ssh command.");
@@ -350,9 +351,14 @@ static int list_config(char *interface, unsigned int remote_port)
 	printf("value {arg=%u}{value=other}{display=Other:}\n", inc++);
 	printf("arg {number=%u}{call=--remote-capture-command}{display=Remote capture command}"
 		"{type=string}{tooltip=The remote command used to capture}{group=Capture}\n", inc++);
-	printf("arg {number=%u}{call=--remote-sudo}{display=Use sudo on the remote machine}"
-		"{type=boolflag}{tooltip=Prepend the capture command with sudo on the remote machine}"
-		"{group=Capture}\n", inc++);
+	printf("arg {number=%u}{call=--remote-sudo-command}{display=Remote privilege elevation command}"
+		"{type=selector}{tooltip=Remote privilege elevation command, such as sudo}{required=false}"
+		"{group=Capture}\n", inc);
+    printf("value {arg=%u}{value=}{display=None}{default=true}\n", inc);
+    printf("value {arg=%u}{value=sudo}{display=sudo}\n", inc);
+    printf("value {arg=%u}{value=doas}{display=doas}\n", inc);
+    printf("value {arg=%u}{value=runas}{display=runas}\n", inc);
+    inc++;
 	printf("arg {number=%u}{call=--remote-noprom}{display=No promiscuous mode}"
 		"{type=boolflag}{tooltip=Don't use promiscuous mode on the remote machine}{group=Capture}"
 		"\n", inc++);
@@ -401,7 +407,7 @@ int main(int argc, char *argv[])
 	extcap_parameters* extcap_conf = g_new0(extcap_parameters, 1);
 	char* help_url;
 	char* help_header = NULL;
-	gboolean use_sudo = FALSE;
+	char* sudo_command = FALSE;
 	gboolean noprom = FALSE;
 	gchar* interface_description = g_strdup("SSH remote capture");
 
@@ -461,7 +467,7 @@ int main(int argc, char *argv[])
 	extcap_help_add_option(extcap_conf, "--remote-interface <iface>", "the remote capture interface");
 	extcap_help_add_option(extcap_conf, "--remote-capture-command-select <selection>", "dumpcap, tcpdump or other remote capture command");
 	extcap_help_add_option(extcap_conf, "--remote-capture-command <capture command>", "the remote capture command");
-	extcap_help_add_option(extcap_conf, "--remote-sudo", "use sudo on the remote machine to capture");
+	extcap_help_add_option(extcap_conf, "--remote-sudo-command", "use sudo on the remote machine to capture");
 	extcap_help_add_option(extcap_conf, "--remote-noprom", "don't use promiscuous mode on the remote machine");
 	extcap_help_add_option(extcap_conf, "--remote-filter <filter>", "a filter for remote capture (default: don't listen on local interfaces IPs)");
 	extcap_help_add_option(extcap_conf, "--remote-count <count>", "the number of packets to capture");
@@ -542,8 +548,8 @@ int main(int argc, char *argv[])
 			remote_capture_command = g_strdup(ws_optarg);
 			break;
 
-		case OPT_REMOTE_SUDO:
-			use_sudo = TRUE;
+		case OPT_REMOTE_SUDO_COMMAND:
+			sudo_command = g_strdup(ws_optarg);
 			break;
 
 		case OPT_REMOTE_FILTER:
@@ -606,7 +612,7 @@ int main(int argc, char *argv[])
 		ssh_params->debug = extcap_conf->debug;
 		ret = ssh_open_remote_connection(ssh_params, remote_interface,
 			filter, remote_capture_command_select, remote_capture_command,
-			use_sudo, noprom, count, extcap_conf->fifo);
+			sudo_command, noprom, count, extcap_conf->fifo);
 		g_free(filter);
 	} else {
 		ws_debug("You should not come here... maybe some parameter missing?");
