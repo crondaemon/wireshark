@@ -534,10 +534,12 @@ wtap_open_return_val procmon_open(wtap *wth, int *err, char **err_info)
     if (header->num_events > MAX_PROCMON_EVENTS) {
         // If we need to read more events and the file is uncompressed, we could
         // use g_mapped_file_new instead.
-        file_info_cleanup(file_info);
         ws_debug("wtap_read_bytes_or_eof() failed, err = %d.", *err);
         *err = WTAP_ERR_BAD_FILE;
         *err_info = ws_strdup_printf("Too many events: %u (max %u)", header->num_events, MAX_PROCMON_EVENTS);
+        // This frees up file_info, into which header points, so free it
+        // after using header
+        file_info_cleanup(file_info);
         return WTAP_OPEN_ERROR;
     }
 
