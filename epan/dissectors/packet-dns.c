@@ -5139,7 +5139,7 @@ dissect_dns_common(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 
       it=proto_tree_add_uint(dns_tree, hf_dns_response_in, tvb, 0, 0, dns_trans->rep_frame);
       proto_item_set_generated(it);
-    } else if PINFO_FD_VISITED(pinfo) {
+    } else if (PINFO_FD_VISITED(pinfo)) {
       expert_add_info(pinfo, transaction_item, &ei_dns_response_missing);
     }
   } else {
