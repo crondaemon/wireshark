@@ -96,7 +96,11 @@ typedef enum ft_result (*FvalueMatches)(const fvalue_t*, const ws_regex_t*, bool
 typedef bool (*FvalueIs)(const fvalue_t*);
 typedef unsigned (*FvalueLen)(fvalue_t*);
 typedef unsigned (*FvalueHashFunc)(const fvalue_t *);
-typedef void (*FvalueSlice)(fvalue_t*, void *, unsigned offset, unsigned length);
+union slice_result {
+	GByteArray *bytes;
+	wmem_strbuf_t *str;
+};
+typedef void (*FvalueSlice)(fvalue_t*, union slice_result, unsigned offset, unsigned length);
 typedef enum ft_result (*FvalueUnaryOp)(fvalue_t *, const fvalue_t*, char **);
 typedef enum ft_result (*FvalueBinaryOp)(fvalue_t *, const fvalue_t*, const fvalue_t*, char **);
 

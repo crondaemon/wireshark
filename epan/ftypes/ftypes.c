@@ -797,9 +797,9 @@ fvalue_to_double(const fvalue_t *fv, double *repr)
 }
 
 typedef struct {
-	fvalue_t	*fv;
-	void		*ptr;
-	bool	slice_failure;
+	fvalue_t	    *fv;
+	union slice_result   out;
+	bool		     slice_failure;
 } slice_data_t;
 
 static bool
@@ -876,7 +876,7 @@ slice_func(void * data, void * user_data)
 	}
 
 	ws_assert(length > 0);
-	fv->ftype->slice(fv, slice_data->ptr, (unsigned)start_offset, (unsigned)length);
+	fv->ftype->slice(fv, slice_data->out, (unsigned)start_offset, (unsigned)length);
 }
 
 static fvalue_t *
@@ -886,7 +886,7 @@ slice_string(fvalue_t *fv, drange_t *d_range)
 	fvalue_t	*new_fv;
 
 	slice_data.fv = fv;
-	slice_data.ptr = wmem_strbuf_create(NULL);
+	slice_data.out.str = wmem_strbuf_create(NULL);
 	slice_data.slice_failure = false;
 
 	/* XXX - We could make some optimizations here based on
@@ -897,7 +897,7 @@ slice_string(fvalue_t *fv, drange_t *d_range)
 	drange_foreach_drange_node(d_range, slice_func, &slice_data);
 
 	new_fv = fvalue_new(FT_STRING);
-	fvalue_set_strbuf(new_fv, slice_data.ptr);
+	fvalue_set_strbuf(new_fv, slice_data.out.str);
 	return new_fv;
 }
 
@@ -908,7 +908,7 @@ slice_bytes(fvalue_t *fv, drange_t *d_range)
 	fvalue_t	*new_fv;
 
 	slice_data.fv = fv;
-	slice_data.ptr = g_byte_array_new();
+	slice_data.out.bytes = g_byte_array_new();
 	slice_data.slice_failure = false;
 
 	/* XXX - We could make some optimizations here based on
@@ -919,7 +919,7 @@ slice_bytes(fvalue_t *fv, drange_t *d_range)
 	drange_foreach_drange_node(d_range, slice_func, &slice_data);
 
 	new_fv = fvalue_new(FT_BYTES);
-	fvalue_set_byte_array(new_fv, slice_data.ptr);
+	fvalue_set_byte_array(new_fv, slice_data.out.bytes);
 	return new_fv;
 }
 

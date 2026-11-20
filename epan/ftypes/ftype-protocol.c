@@ -220,8 +220,9 @@ len(fvalue_t *fv)
 }
 
 static void
-slice(fvalue_t *fv, GByteArray *bytes, unsigned offset, unsigned length)
+slice(fvalue_t *fv, union slice_result result, unsigned offset, unsigned length)
 {
+	GByteArray *bytes = result.bytes;
 	const uint8_t* data;
 	volatile unsigned len = length;
 
@@ -381,7 +382,7 @@ ftype_register_tvbuff(void)
 		NULL,
 		NULL,
 		len,
-		(FvalueSlice)slice,
+		slice,
 		NULL,
 		NULL,				/* unary_minus */
 		NULL,				/* add */

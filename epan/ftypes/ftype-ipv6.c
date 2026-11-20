@@ -171,8 +171,9 @@ len(fvalue_t *fv _U_)
 }
 
 static void
-slice(fvalue_t *fv, GByteArray *bytes, unsigned offset, unsigned length)
+slice(fvalue_t *fv, union slice_result result, unsigned offset, unsigned length)
 {
+	GByteArray *bytes = result.bytes;
 	uint8_t* data;
 
 	data = fv->value.ipv6.addr.bytes + offset;
@@ -231,7 +232,7 @@ ftype_register_ipv6(void)
 		NULL,
 		NULL,
 		len,
-		(FvalueSlice)slice,
+		slice,
 		bitwise_and,
 		NULL,				/* unary_minus */
 		NULL,				/* add */

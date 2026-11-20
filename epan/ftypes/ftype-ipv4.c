@@ -145,8 +145,9 @@ len(fvalue_t *fv _U_)
 }
 
 static void
-slice(fvalue_t *fv, GByteArray *bytes, unsigned offset, unsigned length)
+slice(fvalue_t *fv, union slice_result result, unsigned offset, unsigned length)
 {
+	GByteArray *bytes = result.bytes;
 	uint8_t* data;
 	uint32_t addr = g_htonl(fv->value.ipv4.addr);
 	data = ((uint8_t*)&addr)+offset;
@@ -201,7 +202,7 @@ ftype_register_ipv4(void)
 		NULL,
 		NULL,
 		len,
-		(FvalueSlice)slice,
+		slice,
 		bitwise_and,
 		NULL,				/* unary_minus */
 		NULL,				/* add */

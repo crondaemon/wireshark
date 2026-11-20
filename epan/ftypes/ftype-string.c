@@ -143,8 +143,9 @@ len(fvalue_t *fv)
 }
 
 static void
-slice(fvalue_t *fv, wmem_strbuf_t *buf, unsigned offset, unsigned length)
+slice(fvalue_t *fv, union slice_result result, unsigned offset, unsigned length)
 {
+	wmem_strbuf_t *buf = result.str;
 	const char *str = fv->value.strbuf->str;
 
 	/* Go to the starting offset */
@@ -293,7 +294,7 @@ ftype_register_string(void)
 		NULL,				/* is_negative */
 		NULL,				/* is_nan */
 		len,
-		(FvalueSlice)slice,
+		slice,
 		NULL,				/* bitwise_and */
 		NULL,				/* unary_minus */
 		NULL,				/* add */
@@ -332,7 +333,7 @@ ftype_register_string(void)
 		NULL,				/* is_negative */
 		NULL,				/* is_nan */
 		len,
-		(FvalueSlice)slice,
+		slice,
 		NULL,				/* bitwise_and */
 		NULL,				/* unary_minus */
 		NULL,				/* add */
@@ -371,7 +372,7 @@ ftype_register_string(void)
 		NULL,				/* is_negative */
 		NULL,				/* is_nan */
 		len,
-		(FvalueSlice)slice,
+		slice,
 		NULL,				/* bitwise_and */
 		NULL,				/* unary_minus */
 		NULL,				/* add */
@@ -410,7 +411,7 @@ ftype_register_string(void)
 		NULL,				/* is_negative */
 		NULL,				/* is_nan */
 		len,
-		(FvalueSlice)slice,
+		slice,
 		NULL,				/* bitwise_and */
 		NULL,				/* unary_minus */
 		NULL,				/* add */
@@ -449,7 +450,7 @@ ftype_register_string(void)
 		NULL,				/* is_negative */
 		NULL,				/* is_nan */
 		len,
-		(FvalueSlice)slice,
+		slice,
 		NULL,				/* bitwise_and */
 		NULL,				/* unary_minus */
 		NULL,				/* add */
@@ -488,7 +489,7 @@ ftype_register_string(void)
 		NULL,				/* is_negative */
 		NULL,				/* is_nan */
 		len,
-		(FvalueSlice)slice,
+		slice,
 		NULL,				/* bitwise_and */
 		NULL,				/* unary_minus */
 		NULL,				/* add */
