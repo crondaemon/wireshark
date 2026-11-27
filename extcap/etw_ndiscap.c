@@ -27,7 +27,8 @@
 #include <tdh.h>
 #include <strsafe.h>
 #include <winsock2.h>
-#include <netiodef.h>
+
+#include <wsutil/pint.h>
 
 #include "etl.h"
 #include "etw_ndiscap.h"
@@ -37,6 +38,19 @@
 #define WTAP_ENCAP_ETHERNET                       1
 #define WTAP_ENCAP_RAW_IP                         7
 #define WTAP_ENCAP_IEEE_802_11                   20
+
+// Header lengths and field offsets used to infer the original length of a
+// truncated packet. The fields are read directly rather than through
+// netiodef.h's ETHERNET_HEADER, IPV4_HEADER and IPV6_HEADER, because
+// MinGW-w64 doesn't have netiodef.h.
+#define ETW_ETH_HEADER_LEN          14
+#define ETW_ETH_TYPE_OFFSET         12
+#define ETW_ETHERTYPE_IPV4          0x0800
+#define ETW_ETHERTYPE_IPV6          0x86DD
+#define ETW_IPV4_HEADER_LEN         20
+#define ETW_IPV4_TOTAL_LEN_OFFSET   2
+#define ETW_IPV6_HEADER_LEN         40
+#define ETW_IPV6_PAYLOAD_LEN_OFFSET 4
 
 #define MAX_PACKET_SIZE 0xFFFF
 
@@ -421,9 +435,8 @@ void etw_dump_write_ndiscap_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
     int Type;
     unsigned long TotalFragmentLength;
     unsigned long InferredOriginalFragmentLength = 0;
-    PETHERNET_HEADER EthHdr;
-    PIPV4_HEADER Ipv4Hdr;
-    PIPV6_HEADER Ipv6Hdr;
+    const uint8_t* IpHdr;
+    uint16_t EtherType;
 
     if ((ev->EventHeader.EventDescriptor.Id != tidPacketFragment &&
          ev->EventHeader.EventDescriptor.Id != tidPacketMetadata &&
@@ -635,27 +648,25 @@ void etw_dump_write_ndiscap_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
 
         // Parse the packet to see if it's truncated. If so, try to recover the original length.
         if (Type == WTAP_ENCAP_ETHERNET) {
-            if (TotalFragmentLength >= sizeof(ETHERNET_HEADER)) {
-                EthHdr = (PETHERNET_HEADER)AuxFragBuf;
-                if (ntohs(EthHdr->Type) == ETHERNET_TYPE_IPV4 &&
-                    TotalFragmentLength >= sizeof(IPV4_HEADER) + sizeof(ETHERNET_HEADER)) {
-                    Ipv4Hdr = (PIPV4_HEADER)(EthHdr + 1);
-                    InferredOriginalFragmentLength = ntohs(Ipv4Hdr->TotalLength) + sizeof(ETHERNET_HEADER);
-                } else if (ntohs(EthHdr->Type) == ETHERNET_TYPE_IPV6 &&
-                           TotalFragmentLength >= sizeof(IPV6_HEADER) + sizeof(ETHERNET_HEADER)) {
-                    Ipv6Hdr = (PIPV6_HEADER)(EthHdr + 1);
-                    InferredOriginalFragmentLength = ntohs(Ipv6Hdr->PayloadLength) + sizeof(IPV6_HEADER) + sizeof(ETHERNET_HEADER);
+            if (TotalFragmentLength >= ETW_ETH_HEADER_LEN) {
+                EtherType = pntohu16(AuxFragBuf + ETW_ETH_TYPE_OFFSET);
+                IpHdr = (const uint8_t*)AuxFragBuf + ETW_ETH_HEADER_LEN;
+                if (EtherType == ETW_ETHERTYPE_IPV4 &&
+                    TotalFragmentLength >= ETW_IPV4_HEADER_LEN + ETW_ETH_HEADER_LEN) {
+                    InferredOriginalFragmentLength = pntohu16(IpHdr + ETW_IPV4_TOTAL_LEN_OFFSET) + ETW_ETH_HEADER_LEN;
+                } else if (EtherType == ETW_ETHERTYPE_IPV6 &&
+                           TotalFragmentLength >= ETW_IPV6_HEADER_LEN + ETW_ETH_HEADER_LEN) {
+                    InferredOriginalFragmentLength = pntohu16(IpHdr + ETW_IPV6_PAYLOAD_LEN_OFFSET) + ETW_IPV6_HEADER_LEN + ETW_ETH_HEADER_LEN;
                 }
             }
         } else if (Type == WTAP_ENCAP_RAW_IP) {
             // Raw frames begins with an IPv4/6 header.
-            if (TotalFragmentLength >= sizeof(IPV4_HEADER)) {
-                Ipv4Hdr = (PIPV4_HEADER)AuxFragBuf;
-                if (Ipv4Hdr->Version == 4) {
-                    InferredOriginalFragmentLength = ntohs(Ipv4Hdr->TotalLength) + sizeof(ETHERNET_HEADER);
-                } else if (Ipv4Hdr->Version == 6) {
-                    Ipv6Hdr = (PIPV6_HEADER)(AuxFragBuf);
-                    InferredOriginalFragmentLength = ntohs(Ipv6Hdr->PayloadLength) + sizeof(IPV6_HEADER) + sizeof(ETHERNET_HEADER);
+            if (TotalFragmentLength >= ETW_IPV4_HEADER_LEN) {
+                IpHdr = (const uint8_t*)AuxFragBuf;
+                if ((IpHdr[0] >> 4) == 4) {
+                    InferredOriginalFragmentLength = pntohu16(IpHdr + ETW_IPV4_TOTAL_LEN_OFFSET) + ETW_ETH_HEADER_LEN;
+                } else if ((IpHdr[0] >> 4) == 6) {
+                    InferredOriginalFragmentLength = pntohu16(IpHdr + ETW_IPV6_PAYLOAD_LEN_OFFSET) + ETW_IPV6_HEADER_LEN + ETW_ETH_HEADER_LEN;
                 }
             }
         }

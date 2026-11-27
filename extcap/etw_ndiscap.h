@@ -15,7 +15,7 @@
 #include <glib.h>
 
 #include <windows.h>
-#include <SDKDDKVer.h>
+#include <sdkddkver.h>
 #include <strsafe.h>
 #include <evntcons.h>
 #include <tdh.h>

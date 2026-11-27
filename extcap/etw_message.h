@@ -15,13 +15,16 @@
 #include <glib.h>
 
 #include <windows.h>
-#include <SDKDDKVer.h>
+#include <sdkddkver.h>
 #include <strsafe.h>
 #include <evntcons.h>
 #include <tdh.h>
 #include <stdlib.h>
+#include <winsock2.h>
 #include <ws2def.h>
 #include <ws2ipdef.h>
+
+#include "etw_compat.h"
 
 
 #define MAX_LOG_LINE_LENGTH 1024

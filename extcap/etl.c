@@ -29,11 +29,14 @@
 #include "etw_ndiscap.h"
 
 #include <winternl.h>
+#ifdef __MINGW32__
+/* MinGW-w64 declares the RtlIpv*AddressToString functions in mstcpip.h. */
+#include <mstcpip.h>
+#else
 #include <ip2string.h>
+#endif
 #include <rpc.h>
 #include <winevt.h>
-
-#pragma comment(lib, "ntdll.lib")
 
 #define MAX_PACKET_SIZE 0xFFFF
 #define ADD_OFFSET_TO_POINTER(buffer, offset) (((PBYTE)buffer) + offset)
@@ -209,7 +212,7 @@ typedef struct _etw_frag {
     PWTAP_ETL_RECORD_CONTEXT ctx;
     GByteArray* buf;
 } etw_frag;
-static void etw_frag_free(etw_frag* frag);
+static void etw_frag_free(void* data);
 static etw_frag* etw_frag_new(etw_frag_type type);
 static etw_frag* etw_frag_get(PEVENT_RECORD ev, bool begin, etw_frag_type type);
 static void etw_frag_remove(PEVENT_RECORD ev);
@@ -1078,8 +1081,10 @@ static etw_frag* etw_frag_new(etw_frag_type type)
     return frag;
 }
 
-static void etw_frag_free(etw_frag* frag)
+static void etw_frag_free(void* data)
 {
+    etw_frag* frag = (etw_frag*)data;
+
     g_byte_array_free(frag->buf, true);
     ctx_free(frag->ctx);
     g_free(frag);

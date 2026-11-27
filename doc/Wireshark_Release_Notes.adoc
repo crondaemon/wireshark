@@ -200,6 +200,9 @@ an alias for the protocol and all its fields.
 * `etwdump` now supports capture options and has a much better support of
   undecipherable messages.
 
+* `etwdump` can now be compiled with the MinGW-w64 headers, and MinGW-w64
+  builds include it by default.
+
 // [commaize]
 // --
 // --

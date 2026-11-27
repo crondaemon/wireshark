@@ -811,6 +811,7 @@ the build using MSVC:
   (Affects Wireshark prior to 5.0 only.)
 
 * The Event Tracing for Windows (ETW) extcap cannot be compiled using MinGW-w64.
+  (Affects Wireshark 5.0 and earlier only.)
 
 * Enhanced Kerberos dissection with decryption is not available.
 
@@ -912,6 +913,7 @@ If successful the installer can be found in `$CMAKE_BINARY_DIR/packaging/nsis`.
   (Affects Wireshark prior to 5.0 only.)
 
 * The Event Tracing for Windows (ETW) extcap cannot be compiled using MinGW-w64.
+  (Affects Wireshark 5.0 and earlier only.)
 
 * Enhanced Kerberos dissection with decryption is not available.
 

@@ -290,6 +290,7 @@ if(BUILD_etwdump AND WIN32)
 		tdh
 		wevtapi
 		rpcrt4
+		ntdll
 		${CMAKE_DL_LIBS}
 		${SOCKET_LIBRARY}
 	)

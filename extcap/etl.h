@@ -24,6 +24,8 @@
 #include <tdh.h>
 #include <guiddef.h>
 
+#include "etw_compat.h"
+
 #define LOGGER_NAME L"wireshark etwdump"
 
 /**
