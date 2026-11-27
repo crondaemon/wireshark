@@ -27,6 +27,9 @@
 #include "etw_compat.h"
 
 
+/* Number of events processed so far. Defined in etw_message.c. */
+extern ULONGLONG g_num_events;
+
 #define MAX_LOG_LINE_LENGTH 1024
 #define MAX_KEY_LENGTH 64
 

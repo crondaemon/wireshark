@@ -64,6 +64,21 @@ typedef struct _SCENARIO {
  */
 extern const struct _SCENARIO g_scenarios[];
 
+/* Error from the event callbacks, reported once processing stops. Defined in etl.c. */
+extern char g_err_info[FILENAME_MAX];
+extern int g_err;
+
+/* Capture options from the etwdump command line. Defined in etwdump.c. */
+extern int g_include_undecidable_event;
+extern BOOL g_event_enable_sid;
+extern BOOL g_event_enable_tsid;
+extern BOOL g_event_enable_event_key;
+extern BOOL g_event_enable_property_pstartkey;
+extern BOOL g_event_enable_stack_trace;
+extern BOOL g_event_enable_silos;
+extern BOOL g_event_property_source_container_tracking;
+extern BOOL g_debug_parsers;
+
 /**
  * @brief Dumps ETL data to a PCAPNG file.
  *

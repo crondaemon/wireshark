@@ -43,41 +43,29 @@
 #define ROUND_UP_COUNT(Count,Pow2) \
         ( ((Count)+(Pow2)-1) & (~(((int)(Pow2))-1)) )
 
-extern int g_include_undecidable_event;
-extern BOOL g_event_enable_sid;
-extern BOOL g_event_enable_tsid;
-extern BOOL g_event_enable_event_key;
-extern BOOL g_event_enable_property_pstartkey;
-extern BOOL g_event_enable_stack_trace;
-extern BOOL g_event_enable_silos;
-extern BOOL g_event_property_source_container_tracking;
-extern BOOL g_debug_parsers;
-
 // Microsoft-Windows-Wmbclass-Opn
-const GUID mbb_provider = { 0xA42FE227, 0xA7BF, 0x4483, {0xA5, 0x02, 0x6B, 0xCD, 0xA4, 0x28, 0xCD, 0x96} };
+static const GUID mbb_provider = { 0xA42FE227, 0xA7BF, 0x4483, {0xA5, 0x02, 0x6B, 0xCD, 0xA4, 0x28, 0xCD, 0x96} };
 // Microsoft-Windows-NDIS-PacketCapture
-const GUID ndis_capture_provider = { 0x2ed6006e, 0x4729, 0x4609, {0xb4, 0x23, 0x3e, 0xe7, 0xbc, 0xd6, 0x78, 0xef} };
-// Microsoft-Windows-Ras-NdisWanPacketCapture
-const GUID ndiswan_capture_provider = { 0xD84521F7, 0x2235, 0x4237, {0xa7, 0xc0, 0x14, 0xe3, 0xa9, 0x67, 0x62, 0x86} };
+static const GUID ndis_capture_provider = { 0x2ed6006e, 0x4729, 0x4609, {0xb4, 0x23, 0x3e, 0xe7, 0xbc, 0xd6, 0x78, 0xef} };
 // Microsoft-Windows-SMBClient
-const GUID smbclient_provider = { 0x988C59C5, 0x0A1C, 0x45B6, {0xA5, 0x55, 0x0C, 0x62, 0x27, 0x6E, 0x32, 0x7D} };
+static const GUID smbclient_provider = { 0x988C59C5, 0x0A1C, 0x45B6, {0xA5, 0x55, 0x0C, 0x62, 0x27, 0x6E, 0x32, 0x7D} };
 // Microsoft-Windows-SMBServer
-const GUID smbserver_provider = { 0xD48CE617, 0x33A2, 0x4BC3, {0xA5, 0xC7, 0x11, 0xAA, 0x4F, 0x29, 0x61, 0x9E} };
+static const GUID smbserver_provider = { 0xD48CE617, 0x33A2, 0x4BC3, {0xA5, 0xC7, 0x11, 0xAA, 0x4F, 0x29, 0x61, 0x9E} };
 // Microsoft-Windows-WinINet-Capture
-const GUID wininet_capture_provider = { 0xa70ff94f, 0x570b, 0x4979, { 0xba, 0x5c, 0xe5, 0x9c, 0x9f, 0xea, 0xb6, 0x1b } };
+static const GUID wininet_capture_provider = { 0xa70ff94f, 0x570b, 0x4979, { 0xba, 0x5c, 0xe5, 0x9c, 0x9f, 0xea, 0xb6, 0x1b } };
 // Microsoft-Windows-WebIO
-const GUID webio_provider = { 0x50B3E73C, 0x9370, 0x461D, { 0xBB, 0x9F, 0x26, 0xF3, 0x2D, 0x68, 0x88, 0x7D} };
+static const GUID webio_provider = { 0x50B3E73C, 0x9370, 0x461D, { 0xBB, 0x9F, 0x26, 0xF3, 0x2D, 0x68, 0x88, 0x7D} };
 // Microsoft-Windows-LDAP-Client
-const GUID ldap_client_provider = { 0x099614A5, 0x5DD7, 0x4788, { 0x8B, 0xC9, 0xE2, 0x9F, 0x43, 0xDB, 0x28, 0xFC } };
+static const GUID ldap_client_provider = { 0x099614A5, 0x5DD7, 0x4788, { 0x8B, 0xC9, 0xE2, 0x9F, 0x43, 0xDB, 0x28, 0xFC } };
 // Microsoft-Windows-BTH-BTHPORT
-const GUID bth_bthport_provider = { 0x8A1F9517, 0x3A8C, 0x4A9E, { 0xA0, 0x18, 0x4F, 0x17, 0xA2, 0x00, 0xF2, 0x77 } };
+static const GUID bth_bthport_provider = { 0x8A1F9517, 0x3A8C, 0x4A9E, { 0xA0, 0x18, 0x4F, 0x17, 0xA2, 0x00, 0xF2, 0x77 } };
 
 
-EXTERN_C const GUID DECLSPEC_SELECTANY EventTraceGuid = { 0x68fdd900, 0x4a3e, 0x11d1, {0x84, 0xf4, 0x00, 0x00, 0xf8, 0x04, 0x64, 0xe3} };
-EXTERN_C const GUID DECLSPEC_SELECTANY ImageIdGuid = { 0xb3e675d7, 0x2554, 0x4f18, { 0x83, 0xb, 0x27, 0x62, 0x73, 0x25, 0x60, 0xde } };
-EXTERN_C const GUID DECLSPEC_SELECTANY SystemConfigExGuid = { 0x9b79ee91, 0xb5fd, 0x41c0, { 0xa2, 0x43, 0x42, 0x48, 0xe2, 0x66, 0xe9, 0xd0 } };
-EXTERN_C const GUID DECLSPEC_SELECTANY EventMetadataGuid = { 0xbbccf6c1, 0x6cd1, 0x48c4, {0x80, 0xff, 0x83, 0x94, 0x82, 0xe3, 0x76, 0x71 } };
-EXTERN_C const GUID DECLSPEC_SELECTANY ZeroGuid = { 0 };
+static const GUID event_trace_guid = { 0x68fdd900, 0x4a3e, 0x11d1, {0x84, 0xf4, 0x00, 0x00, 0xf8, 0x04, 0x64, 0xe3} };
+static const GUID ImageIdGuid = { 0xb3e675d7, 0x2554, 0x4f18, { 0x83, 0xb, 0x27, 0x62, 0x73, 0x25, 0x60, 0xde } };
+static const GUID SystemConfigExGuid = { 0x9b79ee91, 0xb5fd, 0x41c0, { 0xa2, 0x43, 0x42, 0x48, 0xe2, 0x66, 0xe9, 0xd0 } };
+static const GUID EventMetadataGuid = { 0xbbccf6c1, 0x6cd1, 0x48c4, {0x80, 0xff, 0x83, 0x94, 0x82, 0xe3, 0x76, 0x71 } };
+static const GUID ZeroGuid = { 0 };
 
 /*
  *  0                   1                   2                   3
@@ -188,13 +176,12 @@ const struct _SCENARIO g_scenarios[] = {
     { SCENARIO_KEY L"SMBClient-Capture", { { 0x988c59c5, 0x0a1c, 0x45b6, { 0xa5, 0x55, 0x0c, 0x62, 0x27, 0x6e, 0x32, 0x7d } }, 0x0800C40300000000, 5 } },
     { SCENARIO_KEY L"SMBServer-Capture", { { 0xd48ce617, 0x33a2, 0x4bc3, { 0xa5, 0xc7, 0x11, 0xaa, 0x4f, 0x29, 0x61, 0x9e } }, 0x0800040300000000, 5 } },
     { SCENARIO_KEY L"BTH-BTHPORT", { { 0x8A1F9517, 0x3A8C, 0x4A9E, { 0xA0, 0x18, 0x4F, 0x17, 0xA2, 0x00, 0xF2, 0x77 } }, 0x8000000000000000, 5 } },
-    { 0, 0 }
+    { 0 }
 };
 
 char g_err_info[FILENAME_MAX];
 int g_err = ERROR_SUCCESS;
 static wtap_dumper* g_pdh;
-extern ULONGLONG g_num_events;
 static PROVIDER_FILTER g_provider_filters[32];
 static BOOL g_is_live_session;
 
@@ -390,7 +377,7 @@ wtap_open_return_val etw_dump(const char* etl_filename, const char* pcapng_filen
                     if (!found)
                     {
                         *err = ERROR_INVALID_PARAMETER;
-                        *err_info = ws_strdup_printf("Unknown scenario: %s", provider_id);
+                        *err_info = ws_strdup_printf("Unknown scenario: %s", ws_optarg);
                         return WTAP_OPEN_ERROR;
                     }
                 }
@@ -530,7 +517,7 @@ wtap_open_return_val etw_dump(const char* etl_filename, const char* pcapng_filen
                 break;
             }
 
-            for (int i = 0; i < ARRAYSIZE(g_provider_filters); i++)
+            for (size_t i = 0; i < ARRAYSIZE(g_provider_filters); i++)
             {
                 if (IsEqualGUID(&g_provider_filters[i].ProviderId, &ZeroGuid))
                 {
@@ -635,7 +622,7 @@ static BOOL is_event_filtered_out(PEVENT_RECORD ev)
         return false;
     }
 
-    for (int i = 0; i < ARRAYSIZE(g_provider_filters); i++)
+    for (size_t i = 0; i < ARRAYSIZE(g_provider_filters); i++)
     {
         if (IsEqualGUID(&g_provider_filters[i].ProviderId, &ev->EventHeader.ProviderId))
         {
@@ -828,7 +815,7 @@ static void ctx_add_tlv_wchar(PWTAP_ETL_RECORD_CONTEXT ctx, enum ETL_TLV_TYPE Ty
 /// <summary>
 /// Initialize context
 /// </summary>
-static PWTAP_ETL_RECORD_CONTEXT ctx_init()
+static PWTAP_ETL_RECORD_CONTEXT ctx_init(void)
 {
     PWTAP_ETL_RECORD_CONTEXT ctx = g_malloc(sizeof(WTAP_ETL_RECORD_CONTEXT));
     ctx->tlv_count = 0;
@@ -880,7 +867,7 @@ static ULONG wtap_etl_rec_build(
     ULONG tlvs_offset = 0;
     char** extended_data_ptrs = NULL;
     ULONG* properties_offsets = NULL;
-    ETW_PROPERTY prop = { 0, 0 };
+    ETW_PROPERTY prop = { 0 };
 
     // Extended Data
     if (ev->ExtendedDataCount != 0)
@@ -1149,7 +1136,7 @@ static void etw_dump_write_smb_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
     PROPERTY_DATA_DESCRIPTOR DataDescriptor = { 0 };
     DWORD PropertySize = 0, Length = 0;
     ULONG status;
-    BYTE* Buffer = NULL;
+    BYTE* PropBuffer = NULL;
 
     if (ev->EventHeader.EventDescriptor.Id == 2000)
     {
@@ -1162,8 +1149,8 @@ static void etw_dump_write_smb_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
         DataDescriptor.ArrayIndex = ULONG_MAX;
         status = TdhGetPropertySize(ev, 0, NULL, 1, &DataDescriptor, &Length);
         if (status != NO_ERROR) goto end;
-        Buffer = g_malloc(Length);
-        status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, Length, Buffer);
+        PropBuffer = g_malloc(Length);
+        status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, Length, PropBuffer);
         if (status != NO_ERROR) goto end;
 
         if (ev->EventHeader.EventDescriptor.Keyword & 0x40000000) /* PacketStart */
@@ -1173,7 +1160,7 @@ static void etw_dump_write_smb_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
             if (frag == NULL) goto end;
 
             // Extract "PeerAddress" from blob
-            SOCKADDR_STORAGE* pPeerAddress = (SOCKADDR_STORAGE*)ADD_OFFSET_TO_POINTER(Buffer, 8);
+            SOCKADDR_STORAGE* pPeerAddress = (SOCKADDR_STORAGE*)ADD_OFFSET_TO_POINTER(PropBuffer, 8);
             DWORD PeerAddressLength = (Length > 8) ? Length - 8 : 0;
 
             // Format PeerAddress, if the blob is long enough for it
@@ -1226,7 +1213,7 @@ static void etw_dump_write_smb_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
             }
 
             // Append data
-            g_byte_array_append(frag->buf, Buffer, Length);
+            g_byte_array_append(frag->buf, PropBuffer, Length);
         }
 
         if (ev->EventHeader.EventDescriptor.Keyword & 0x80000000)  /* PacketEnd */
@@ -1309,17 +1296,17 @@ static void etw_dump_write_smb_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
             // Size cannot be longer than 3 octets
             goto nfend;
         Length = PropertySize + 4;  // Make room for the Netbios header
-        Buffer = g_malloc(Length);
-        status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, PropertySize, ADD_OFFSET_TO_POINTER(Buffer, 4));
+        PropBuffer = g_malloc(Length);
+        status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, PropertySize, ADD_OFFSET_TO_POINTER(PropBuffer, 4));
         if (status != NO_ERROR) goto nfend;
 
         // Netbios header
-        Buffer[0] = 0;
-        Buffer[1] = (PropertySize >> 0x10) & 0xFF;
-        Buffer[2] = (PropertySize >> 0x08) & 0xFF;
-        Buffer[3] = PropertySize & 0xFF;
+        PropBuffer[0] = 0;
+        PropBuffer[1] = (PropertySize >> 0x10) & 0xFF;
+        PropBuffer[2] = (PropertySize >> 0x08) & 0xFF;
+        PropBuffer[3] = PropertySize & 0xFF;
 
-        ctx_add_tlv_user_data(ctx, Buffer, Length);
+        ctx_add_tlv_user_data(ctx, PropBuffer, Length);
 
         // Dump
         total_packet_length = wtap_etl_rec_build(&etl_record, ev, ctx);
@@ -1334,8 +1321,8 @@ static void etw_dump_write_smb_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
 
 end:
 
-    if (Buffer)
-        g_free(Buffer);
+    if (PropBuffer)
+        g_free(PropBuffer);
 }
 
 static void etw_dump_write_wininet_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
@@ -1346,7 +1333,7 @@ static void etw_dump_write_wininet_event(PEVENT_RECORD ev, ULARGE_INTEGER timest
     DWORD Length = 0;
     ULONG status;
     ULONGLONG SessionId = 0;
-    BYTE* Buffer = NULL;
+    BYTE* PropBuffer = NULL;
     PWTAP_ETL_RECORD_CONTEXT ctx = ctx_init();
 
     // Get "SessionId" property (same for request / response)
@@ -1361,11 +1348,11 @@ static void etw_dump_write_wininet_event(PEVENT_RECORD ev, ULARGE_INTEGER timest
     DataDescriptor.ArrayIndex = ULONG_MAX;
     status = TdhGetPropertySize(ev, 0, NULL, 1, &DataDescriptor, &Length);
     if (status != NO_ERROR) goto end;
-    Buffer = g_malloc(Length);
-    status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, Length, Buffer);
+    PropBuffer = g_malloc(Length);
+    status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, Length, PropBuffer);
     if (status != NO_ERROR) goto end;
 
-    ctx_add_tlv_user_data(ctx, Buffer, Length);
+    ctx_add_tlv_user_data(ctx, PropBuffer, Length);
 
     // Dump
     total_packet_length = wtap_etl_rec_build(&etl_record, ev, ctx);
@@ -1376,8 +1363,8 @@ static void etw_dump_write_wininet_event(PEVENT_RECORD ev, ULARGE_INTEGER timest
 end:
     ctx_free(ctx);
 
-    if (Buffer)
-        g_free(Buffer);
+    if (PropBuffer)
+        g_free(PropBuffer);
 }
 
 static void etw_dump_write_webio_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
@@ -1388,7 +1375,7 @@ static void etw_dump_write_webio_event(PEVENT_RECORD ev, ULARGE_INTEGER timestam
     DWORD Length = 0, PropertySize = 0;
     ULONG status;
     ULONGLONG SessionId = 0;
-    BYTE* Buffer = NULL;
+    BYTE* PropBuffer = NULL;
     PWTAP_ETL_RECORD_CONTEXT ctx = ctx_init();
 
     // "SessionId" equivalent (same for request / response)
@@ -1423,11 +1410,11 @@ static void etw_dump_write_webio_event(PEVENT_RECORD ev, ULARGE_INTEGER timestam
     if (status != NO_ERROR) goto end;
     if (Length > PropertySize)
         Length = PropertySize;
-    Buffer = g_malloc(PropertySize);
-    status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, PropertySize, Buffer);
+    PropBuffer = g_malloc(PropertySize);
+    status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, PropertySize, PropBuffer);
     if (status != NO_ERROR) goto end;
 
-    ctx_add_tlv_user_data(ctx, Buffer, Length);
+    ctx_add_tlv_user_data(ctx, PropBuffer, Length);
 
     // Dump
     total_packet_length = wtap_etl_rec_build(&etl_record, ev, ctx);
@@ -1438,8 +1425,8 @@ static void etw_dump_write_webio_event(PEVENT_RECORD ev, ULARGE_INTEGER timestam
 end:
     ctx_free(ctx);
 
-    if (Buffer)
-        g_free(Buffer);
+    if (PropBuffer)
+        g_free(PropBuffer);
 }
 
 static void etw_dump_write_ldap_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
@@ -1536,7 +1523,7 @@ static void etw_dump_write_bthport_event(PEVENT_RECORD ev, ULARGE_INTEGER timest
     DWORD DataLen = 0, PropertySize = 0;
     DWORD Type = 0;
     ULONG status;
-    BYTE* Buffer = NULL;
+    BYTE* PropBuffer = NULL;
     PWTAP_ETL_RECORD_CONTEXT ctx = ctx_init();
     bool is_inbound = true;
 
@@ -1555,8 +1542,8 @@ static void etw_dump_write_bthport_event(PEVENT_RECORD ev, ULARGE_INTEGER timest
     if (status != NO_ERROR || PropertySize == 0) goto end;
     if (DataLen > PropertySize)
         DataLen = PropertySize;
-    Buffer = g_malloc(PropertySize + 1);
-    status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, PropertySize, Buffer + 1);
+    PropBuffer = g_malloc(PropertySize + 1);
+    status = TdhGetProperty(ev, 0, NULL, 1, &DataDescriptor, PropertySize, PropBuffer + 1);
     if (status != NO_ERROR) goto end;
 
     // Get "BIP_Type" property
@@ -1570,29 +1557,29 @@ static void etw_dump_write_bthport_event(PEVENT_RECORD ev, ULARGE_INTEGER timest
     switch (Type)
     {
         case 1: // HCI Command
-            Buffer[0] = 0x01;
+            PropBuffer[0] = 0x01;
             is_inbound = false;
             break;
 
         case 2: // HCI Event
-            Buffer[0] = 0x04;
+            PropBuffer[0] = 0x04;
             is_inbound = true;
             break;
 
         case 3: // ACL received
-            Buffer[0] = 0x02;
+            PropBuffer[0] = 0x02;
             is_inbound = true;
             break;
 
         case 4: // ACL sent
-            Buffer[0] = 0x02;
+            PropBuffer[0] = 0x02;
             is_inbound = false;
             break;
 
         default:
-            Buffer[0] = Type & 0xFF;
+            PropBuffer[0] = Type & 0xFF;
     }
-    ctx_add_tlv_user_data(ctx, Buffer, DataLen + 1);
+    ctx_add_tlv_user_data(ctx, PropBuffer, DataLen + 1);
 
     // Dump
     total_packet_length = wtap_etl_rec_build(&etl_record, ev, ctx);
@@ -1603,8 +1590,8 @@ static void etw_dump_write_bthport_event(PEVENT_RECORD ev, ULARGE_INTEGER timest
 end:
     ctx_free(ctx);
 
-    if (Buffer)
-        g_free(Buffer);
+    if (PropBuffer)
+        g_free(PropBuffer);
 }
 
 static void etw_dump_write_general_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
@@ -1626,7 +1613,7 @@ static void etw_dump_write_general_event(PEVENT_RECORD ev, ULARGE_INTEGER timest
 
     /* Skip EventTrace events */
     if (ev->EventHeader.Flags & EVENT_HEADER_FLAG_CLASSIC_HEADER &&
-        IsEqualGUID(&ev->EventHeader.ProviderId, &EventTraceGuid))
+        IsEqualGUID(&ev->EventHeader.ProviderId, &event_trace_guid))
     {
         /*
         * The first event in every ETL file contains the data from the file header.

@@ -304,7 +304,7 @@ static int list_config_option(const char* interface, const char* option_name, ch
     uint8_t default_level = 4;
     WCHAR provider_id[FILENAME_MAX] = { 0 };
     GUID ProviderGuid = { 0 };
-    HRESULT hr = -1;
+    RPC_STATUS uuid_status = RPC_S_INVALID_STRING_UUID;
 
     if (!interface) {
         ws_warning("No interface specified.");
@@ -331,7 +331,7 @@ static int list_config_option(const char* interface, const char* option_name, ch
         {
             if (wcscmp(scenario->name, provider_id) == 0)
             {
-                hr = 0;
+                uuid_status = RPC_S_OK;
                 default_keyword = scenario->ProviderFilter.Keyword;
                 default_level = scenario->ProviderFilter.Level;
                 ProviderGuid = scenario->ProviderFilter.ProviderId;
@@ -342,10 +342,10 @@ static int list_config_option(const char* interface, const char* option_name, ch
     }
     else
     {
-        hr = UuidFromString(provider_id, &ProviderGuid);
+        uuid_status = UuidFromString(provider_id, &ProviderGuid);
     }
 
-    if (hr != ERROR_SUCCESS) {
+    if (uuid_status != RPC_S_OK) {
         ws_warning("Invalid provider or scenario %s", option_value);
         return EXIT_FAILURE;
     }
@@ -372,7 +372,7 @@ static int list_config_option(const char* interface, const char* option_name, ch
     printf("value {arg=%u}{value=5}{display=5 Verbose}{default=%s}{group=ETW Generic}\n", loglevelselector, default_level == 5 ? "true" : "false");
 
     /* Get Keywords for this provider */
-   /* if (hr == 0)
+   /* if (uuid_status == RPC_S_OK)
     {
         TDHSTATUS status;
         PPROVIDER_FIELD_INFOARRAY pBuffer = NULL;

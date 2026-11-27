@@ -82,7 +82,7 @@ static DWORD GetPropertyLength(PEVENT_RECORD pEvent, PTRACE_EVENT_INFO pInfo, UL
             }
             else
             {
-                ws_debug("Event %d Unexpected length of 0 for intype %d and outtype %d", g_num_events,
+                ws_debug("Event %llu Unexpected length of 0 for intype %d and outtype %d", g_num_events,
                     pInfo->EventPropertyInfoArray[i].nonStructType.InType,
                     pInfo->EventPropertyInfoArray[i].nonStructType.OutType);
 
@@ -283,7 +283,7 @@ PBYTE extract_property(PEVENT_RECORD pEvent, PTRACE_EVENT_INFO pInfo, DWORD Poin
                     if (oversize_formatted_data == NULL)
                     {
                         status = ERROR_OUTOFMEMORY;
-                        StringCbPrintf(pExtract->value, sizeof(pExtract->value), L"%s: Allocate FormattedData memory (size %d) for array item %d failed 0x%x", pExtract->key, formatted_data_size, k, status);
+                        StringCbPrintf(pExtract->value, sizeof(pExtract->value), L"%s: Allocate FormattedData memory (size %lu) for array item %d failed 0x%x", pExtract->key, formatted_data_size, k, status);
                         break;
                     }
 
@@ -359,7 +359,7 @@ BOOL get_event_information(PEVENT_RECORD pEvent, PTRACE_EVENT_INFO* pInfo)
         *pInfo = (TRACE_EVENT_INFO*)g_malloc(BufferSize);
         if (*pInfo == NULL)
         {
-            ws_debug("Event %d GetEventInformation Failed to allocate memory for event info (size=%lu).", g_num_events, BufferSize);
+            ws_debug("Event %llu GetEventInformation Failed to allocate memory for event info (size=%lu).", g_num_events, BufferSize);
             goto Exit;
         }
         /* Retrieve the event metadata. */

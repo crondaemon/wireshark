@@ -104,7 +104,6 @@ static const char* DOT11_PHY_TYPE_NAMES[] = {
     "802.11ax"        // dot11_phy_type_he = 10
 };
 
-static unsigned long long NumFramesConverted;
 static char AuxFragBuf[MAX_PACKET_SIZE] = {0};
 static unsigned long AuxFragBufOffset;
 
@@ -169,10 +168,6 @@ struct INTERFACE {
 
 #define IFACE_HT_SIZE 100
 static struct INTERFACE* InterfaceHashTable[IFACE_HT_SIZE];
-static unsigned long NumInterfaces;
-
-extern char g_err_info[FILENAME_MAX];
-extern int g_err;
 
 static unsigned long HashInterface(unsigned long LowerIfIndex)
 {
@@ -210,7 +205,7 @@ static char *GetTdhWideStringProperty(PEVENT_RECORD ev, const wchar_t *PropertyN
 {
     PROPERTY_DATA_DESCRIPTOR Desc;
     ULONG PropertySize = 0;
-    wchar_t *Buffer;
+    wchar_t *WideBuffer;
     char *NarrowBuffer;
     int Err, NarrowLen;
 
@@ -224,32 +219,32 @@ static char *GetTdhWideStringProperty(PEVENT_RECORD ev, const wchar_t *PropertyN
         return _strdup("");
     }
 
-    Buffer = malloc(PropertySize + sizeof(wchar_t));
-    if (Buffer == NULL) {
+    WideBuffer = malloc(PropertySize + sizeof(wchar_t));
+    if (WideBuffer == NULL) {
         g_err = ERROR_OUTOFMEMORY;
         sprintf_s(g_err_info, sizeof(g_err_info), "malloc failed to allocate memory for wide string property");
         exit(1);
     }
 
-    Err = TdhGetProperty(ev, 0, NULL, 1, &Desc, PropertySize, (PBYTE)Buffer);
+    Err = TdhGetProperty(ev, 0, NULL, 1, &Desc, PropertySize, (PBYTE)WideBuffer);
     if (Err != NO_ERROR) {
-        Buffer[0] = L'\0';
+        WideBuffer[0] = L'\0';
     } else {
         // Since PropertySize is a multiple of sizeof(wchar_t), this properly
         // null terminates and WideCharToMultiByte will properly null terminate
         // the return and include the null terminator in the returned length.
-        Buffer[PropertySize / sizeof(wchar_t)] = L'\0';
+        WideBuffer[PropertySize / sizeof(wchar_t)] = L'\0';
     }
 
-    NarrowLen = WideCharToMultiByte(CP_ACP, 0, Buffer, -1, NULL, 0, NULL, NULL);
+    NarrowLen = WideCharToMultiByte(CP_ACP, 0, WideBuffer, -1, NULL, 0, NULL, NULL);
     if (NarrowLen <= 0) {
-        free(Buffer);
+        free(WideBuffer);
         return _strdup("");
     }
 
     NarrowBuffer = malloc(NarrowLen);
     if (NarrowBuffer == NULL) {
-        free(Buffer);
+        free(WideBuffer);
         g_err = ERROR_OUTOFMEMORY;
         sprintf_s(g_err_info, sizeof(g_err_info), "malloc failed to allocate memory for wide string property");
         exit(1);
@@ -257,14 +252,14 @@ static char *GetTdhWideStringProperty(PEVENT_RECORD ev, const wchar_t *PropertyN
 
     WideCharToMultiByte(CP_ACP,
         0,
-        Buffer,
+        WideBuffer,
         -1,
         NarrowBuffer,
         NarrowLen,
         NULL,
         NULL);
 
-    free(Buffer);
+    free(WideBuffer);
     return NarrowBuffer;
 }
 
@@ -274,9 +269,9 @@ static struct INTERFACE* AddInterface(PEVENT_RECORD ev, unsigned long LowerIfInd
     struct INTERFACE* NewIface = malloc(sizeof(struct INTERFACE));
 
 #define IF_STRING_MAX_SIZE 128
-    char IfName[IF_STRING_MAX_SIZE];
+    char IfName[IF_STRING_MAX_SIZE] = "";
     size_t IfNameLength = 0;
-    char IfDesc[IF_STRING_MAX_SIZE];
+    char IfDesc[IF_STRING_MAX_SIZE] = "";
     size_t IfDescLength = 0;
     //etw pcagng interface will be 0 always, network pcagng interface will start with 1
     static int PcapNgIfIndex = 1;
@@ -306,12 +301,9 @@ static struct INTERFACE* AddInterface(PEVENT_RECORD ev, unsigned long LowerIfInd
     NewIface->Next = *Iface;
 
     *Iface = NewIface;
-    NumInterfaces++;
 
     NewIface->PcapNgIfIndex = PcapNgIfIndex;
     PcapNgIfIndex++;
-    memset(IfName, 0, sizeof(IfName));
-    memset(IfDesc, 0, sizeof(IfDesc));
     switch (NewIface->PktEncapType) {
     case WTAP_ENCAP_ETHERNET:
         if (NewIface->IsVMNic) {
@@ -332,7 +324,7 @@ static struct INTERFACE* AddInterface(PEVENT_RECORD ev, unsigned long LowerIfInd
             );
         }
         else {
-            printf("IF: medium=eth\tID=%u\tIfIndex=%u\tVlanID=%i", NewIface->PcapNgIfIndex, NewIface->LowerIfIndex, NewIface->VlanId);
+            printf("IF: medium=eth\tID=%lu\tIfIndex=%lu\tVlanID=%i", NewIface->PcapNgIfIndex, NewIface->LowerIfIndex, NewIface->VlanId);
             StringCchPrintfA(IfName, IF_STRING_MAX_SIZE, "eth:%lu:%i", NewIface->LowerIfIndex, NewIface->VlanId);
         }
         break;
@@ -345,17 +337,23 @@ static struct INTERFACE* AddInterface(PEVENT_RECORD ev, unsigned long LowerIfInd
         StringCchPrintfA(IfName, IF_STRING_MAX_SIZE, "mbb:%lu", NewIface->LowerIfIndex);
         break;
     }
-    StringCchLengthA(IfName, IF_STRING_MAX_SIZE, &IfNameLength);
+    if (FAILED(StringCchLengthA(IfName, IF_STRING_MAX_SIZE, &IfNameLength))) {
+        IfNameLength = 0;
+    }
 
     if (NewIface->LowerIfIndex != NewIface->MiniportIfIndex) {
         printf("\t(LWF over IfIndex %lu)", NewIface->MiniportIfIndex);
         StringCchPrintfA(IfDesc, IF_STRING_MAX_SIZE, "LWF over IfIndex %lu", NewIface->MiniportIfIndex);
-        StringCchLengthA(IfDesc, IF_STRING_MAX_SIZE, &IfDescLength);
+        if (FAILED(StringCchLengthA(IfDesc, IF_STRING_MAX_SIZE, &IfDescLength))) {
+            IfDescLength = 0;
+        }
     }
 
     if (NewIface->VlanId != 0) {
-        StringCchPrintfA(IfDesc + IfDescLength, IF_STRING_MAX_SIZE, " VlanID=%i ", NewIface->VlanId);
-        StringCchLengthA(IfDesc, IF_STRING_MAX_SIZE, &IfDescLength);
+        StringCchPrintfA(IfDesc + IfDescLength, IF_STRING_MAX_SIZE - IfDescLength, " VlanID=%i ", NewIface->VlanId);
+        if (FAILED(StringCchLengthA(IfDesc, IF_STRING_MAX_SIZE, &IfDescLength))) {
+            IfDescLength = 0;
+        }
     }
 
     printf("\n");
@@ -593,7 +591,7 @@ void etw_dump_write_ndiscap_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
                 PacketMetadata.uPhyId = 0; // Set to unknown if outside known bounds.
             }
 
-            Err = StringCchPrintfA(Comment, COMMENT_MAX_SIZE, "PID=%d ProcessorNumber=%d Packet Metadata: ReceiveFlags:0x%x, PhyType:%s, CenterCh:%u, NumMPDUsReceived:%u, RSSI:%d, DataRate:%u",
+            Err = StringCchPrintfA(Comment, COMMENT_MAX_SIZE, "PID=%lu ProcessorNumber=%d Packet Metadata: ReceiveFlags:0x%x, PhyType:%s, CenterCh:%u, NumMPDUsReceived:%u, RSSI:%d, DataRate:%u",
                 ev->EventHeader.ProcessId,
                 ev->BufferContext.ProcessorNumber,
                 PacketMetadata.uReceiveFlags,
@@ -607,7 +605,7 @@ void etw_dump_write_ndiscap_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
             memset(&PacketMetadata, 0, sizeof(DOT11_EXTSTA_RECV_CONTEXT));
         } else if (CurrentPacketIsVMSwitchPacketFragment) {
             if (VMSwitchPacketFragment.DestinationCount > 0) {
-                Err = StringCchPrintfA(Comment, COMMENT_MAX_SIZE, "PID=%d ProcessorNumber=%d VlanId=%d SrcPortId=%d SrcNicType=%s SrcNicName=%s SrcPortName=%s DstNicCount=%d",
+                Err = StringCchPrintfA(Comment, COMMENT_MAX_SIZE, "PID=%lu ProcessorNumber=%d VlanId=%d SrcPortId=%lu SrcNicType=%s SrcNicName=%s SrcPortName=%s DstNicCount=%lu",
                     ev->EventHeader.ProcessId,
                     ev->BufferContext.ProcessorNumber,
                     Iface->VlanId,
@@ -618,7 +616,7 @@ void etw_dump_write_ndiscap_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
                     VMSwitchPacketFragment.DestinationCount
                 );
             } else {
-                Err = StringCchPrintfA(Comment, COMMENT_MAX_SIZE, "PID=%d ProcessorNumber=%d VlanId=%d SrcPortId=%d SrcNicType=%s SrcNicName=%s SrcPortName=%s",
+                Err = StringCchPrintfA(Comment, COMMENT_MAX_SIZE, "PID=%lu ProcessorNumber=%d VlanId=%d SrcPortId=%lu SrcNicType=%s SrcNicName=%s SrcPortName=%s",
                     ev->EventHeader.ProcessId,
                     ev->BufferContext.ProcessorNumber,
                     Iface->VlanId,
@@ -629,7 +627,7 @@ void etw_dump_write_ndiscap_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
                     );
             }
         } else {
-            Err = StringCchPrintfA(Comment, COMMENT_MAX_SIZE, "PID=%d ProcessorNumber=%d", ev->EventHeader.ProcessId, ev->BufferContext.ProcessorNumber);
+            Err = StringCchPrintfA(Comment, COMMENT_MAX_SIZE, "PID=%lu ProcessorNumber=%d", ev->EventHeader.ProcessId, ev->BufferContext.ProcessorNumber);
         }
 
         if (Err != NO_ERROR) {
@@ -684,7 +682,6 @@ void etw_dump_write_ndiscap_event(PEVENT_RECORD ev, ULARGE_INTEGER timestamp)
             );
 
         AuxFragBufOffset = 0;
-        NumFramesConverted++;
     } else {
         AuxFragBufOffset += FragLength;
     }
